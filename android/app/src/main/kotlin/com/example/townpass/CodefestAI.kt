@@ -94,6 +94,7 @@ class CodefestAI(private val activity: MainActivity) : MethodChannel.MethodCallH
                         }
                         check(!cancelled.get())
                         engine!!.createConversation().use { chat ->
+                            check(!cancelled.get())
                             conversation = chat
                             val reply = chat.sendMessage(prompt, maxOutputToken = 256).toString()
                             response = if (cancelled.get()) error("cancelled") else mapOf("status" to "success", "text" to reply.take(6000))

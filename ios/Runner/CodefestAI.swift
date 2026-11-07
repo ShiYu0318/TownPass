@@ -49,7 +49,7 @@ final class CodefestAI: NSObject, FlutterPlugin {
       let recognizer = locales.contains(locale) ? SFSpeechRecognizer(locale: Locale(identifier: locale)) : nil
       result(["status":"success", "modelReady":receipt() != nil, "voiceAvailable":recognizer?.supportsOnDeviceRecognition == true, "model":"Gemma 3 1B INT4"])
     case "generate":
-      guard generationId == nil else { result(error("busy")); return }
+      guard generationId == nil, voiceId == nil else { result(error("busy")); return }
       guard let prompt = args["prompt"] as? String, !prompt.isEmpty, prompt.utf16.count <= 6000 else { result(error("invalid_input")); return }
       guard let expected = receipt() else { result(error("model_missing")); return }
       generationId = id
@@ -68,6 +68,7 @@ final class CodefestAI: NSObject, FlutterPlugin {
           }
           guard let current = engine else { throw NSError(domain:"model_missing",code:1) }
           let chat = try await current.createConversation()
+          try Task.checkCancellation()
           conversation = chat
           let reply = try await chat.sendMessage(Message(prompt), maxOutputTokens: 256)
           try Task.checkCancellation()
