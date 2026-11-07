@@ -14,6 +14,7 @@ class CodefestScanMessageHandler extends TPWebMessageHandler {
     'http://127.0.0.1:8766',
     'http://localhost:8082',
     'http://home.yoyo899843.com:8000',
+    'https://home.yoyo899843.com',
   };
   @override
   Future<void> handle({

@@ -35,7 +35,7 @@ final class CodefestAI: NSObject, FlutterPlugin {
     guard let data = try? Data(contentsOf: directory.appendingPathComponent("receipt.json")),
       let value = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any],
       value["source"] as? String == Self.source,
-      let digest = value["sha256"] as? String, digest.range(of: "^[a-f0-9]{64}$", options: .regularExpression) != nil,
+      let digest = value["sha256"] as? String, digest == "1325ae366d31950f137c9c357b9fa89448b176d76998180c08ceaca78bba98be",
       let attributes = try? FileManager.default.attributesOfItem(atPath: model.path),
       (attributes[.size] as? NSNumber)?.int64Value == 584417280 else { return nil }
     return digest
@@ -67,10 +67,11 @@ final class CodefestAI: NSObject, FlutterPlugin {
             engine = loaded
           }
           guard let current = engine else { throw NSError(domain:"model_missing",code:1) }
-          let chat = try await current.createConversation()
+          let sampler = try SamplerConfig(topK: 40, topP: 0.9, temperature: 0.2)
+          let chat = try await current.createConversation(with: ConversationConfig(samplerConfig: sampler))
           try Task.checkCancellation()
           conversation = chat
-          let reply = try await chat.sendMessage(Message(prompt), maxOutputTokens: 256)
+          let reply = try await chat.sendMessage(Message(prompt), repetitionPenaltyConfig: RepetitionPenaltyConfig(repetitionPenalty: 1.15), noRepeatNgramConfig: NoRepeatNgramConfig(noRepeatNgramSize: 4), maxOutputTokens: 256)
           try Task.checkCancellation()
           result(["status":"success", "text":String(reply.toString.prefix(6000))])
         } catch {

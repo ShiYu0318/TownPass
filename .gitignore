@@ -91,3 +91,5 @@ app.*.map.json
 .fvm/
 # Generated from CodeFest web sources by package-townpass-web.py
 /assets/codefest_web.bundle
+
+/assets/gemma_release.json

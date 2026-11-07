@@ -94,6 +94,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/codefest_web.bundle
+    - assets/gemma_release.json
     - assets/mock_data/
     - assets/image/
     - assets/svg/

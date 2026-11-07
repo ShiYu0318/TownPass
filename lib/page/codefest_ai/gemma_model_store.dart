@@ -5,6 +5,7 @@ import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:town_pass/page/codefest_ai/gemma_release.dart';
 
 class GemmaModelStore {
   static const fileName = 'gemma3-1b-it-int4.litertlm';
@@ -12,34 +13,20 @@ class GemmaModelStore {
   static const size = 584417280;
   static const source =
       'https://huggingface.co/litert-community/Gemma3-1B-IT/resolve/$revision/$fileName';
-  static const pointer =
-      'https://huggingface.co/litert-community/Gemma3-1B-IT/raw/$revision/$fileName';
   final HttpClient _client = HttpClient()
     ..connectionTimeout = const Duration(seconds: 30);
   bool _cancelled = false;
   static bool approvedUri(Uri uri) =>
       uri.scheme == 'https' &&
       uri.userInfo.isEmpty &&
-      (uri.port == 443) &&
-      (uri.host == 'huggingface.co' ||
-          uri.host.endsWith('.huggingface.co') ||
-          uri.host.endsWith('.hf.co'));
-  static String parsePointer(String value) {
-    final match = RegExp(
-      r'^version https://git-lfs.github.com/spec/v1\noid sha256:([a-f0-9]{64})\nsize 584417280\n?$',
-    ).firstMatch(value);
-    if (match == null) {
-      throw const FormatException('Invalid pinned Google artifact pointer');
-    }
-    return match.group(1)!;
-  }
-
+      uri.port == 443 &&
+      uri.host == 'home.yoyo899843.com';
   void cancel() {
     _cancelled = true;
     _client.close(force: true);
   }
 
-  Future<HttpClientResponse> _open(String url, String token) async {
+  Future<HttpClientResponse> _open(String url) async {
     var uri = Uri.parse(url);
     for (var attempt = 0; attempt < 6; attempt++) {
       if (_cancelled || !approvedUri(uri)) {
@@ -47,9 +34,6 @@ class GemmaModelStore {
       }
       final request = await _client.getUrl(uri);
       request.followRedirects = false;
-      if (token.isNotEmpty && uri.host == 'huggingface.co') {
-        request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $token');
-      }
       final response = await request.close().timeout(
         const Duration(seconds: 60),
       );
@@ -73,24 +57,22 @@ class GemmaModelStore {
 
   Future<void> install({
     required bool termsAccepted,
-    required String token,
+    GemmaRelease? release,
     required void Function(double) onProgress,
   }) async {
     if (!termsAccepted) throw StateError('Gemma license acceptance required');
-    final metadata = await _open(pointer, token);
-    final bytes = <int>[];
-    await for (final chunk in metadata.timeout(const Duration(seconds: 60))) {
-      bytes.addAll(chunk);
-      if (bytes.length > 1024) throw const FormatException('Oversized pointer');
+    final metadata = release ?? await GemmaRelease.load();
+    if (!metadata.available || metadata.digest == null) {
+      throw StateError('Model release not published');
     }
-    final expected = parsePointer(utf8.decode(bytes));
+    final expected = metadata.digest!;
     final base = await getApplicationSupportDirectory();
     final directory = Directory('${base.path}/CodefestAI');
     await directory.create(recursive: true);
     final working = await directory.createTemp('.install-');
     final temporary = File('${working.path}/$fileName.part');
     try {
-      final response = await _open(source, token);
+      final response = await _open(GemmaRelease.download);
       var count = 0;
       final output = await temporary.open(mode: FileMode.write);
       try {
@@ -128,6 +110,11 @@ class GemmaModelStore {
         }),
         flush: true,
       );
+      await File('${directory.path}/GEMMA_TERMS.txt')
+          .writeAsString(metadata.agreement);
+      await File('${directory.path}/PROHIBITED_USE_POLICY.txt')
+          .writeAsString(metadata.policy);
+      await File('${directory.path}/NOTICE').writeAsString(metadata.notice);
       await receipt.rename('${directory.path}/receipt.json');
     } finally {
       if (await working.exists()) await working.delete(recursive: true);

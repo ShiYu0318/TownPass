@@ -15,6 +15,10 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import com.google.ai.edge.litertlm.Backend
 import com.google.ai.edge.litertlm.Conversation
+import com.google.ai.edge.litertlm.ConversationConfig
+import com.google.ai.edge.litertlm.SamplerConfig
+import com.google.ai.edge.litertlm.RepetitionPenaltyConfig
+import com.google.ai.edge.litertlm.NoRepeatNgramConfig
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.EngineConfig
 import io.flutter.plugin.common.MethodCall
@@ -48,7 +52,7 @@ class CodefestAI(private val activity: MainActivity) : MethodChannel.MethodCallH
     private fun error(code: String) = mapOf("status" to "error", "code" to code)
     private fun receipt(): String? = try {
         val receipt = JSONObject(File(activity.filesDir, "CodefestAI/receipt.json").readText())
-        receipt.getString("sha256").takeIf { receipt.getString("source") == source && it.matches(Regex("[a-f0-9]{64}")) && model.length() == 584417280L }
+        receipt.getString("sha256").takeIf { receipt.getString("source") == source && it == "1325ae366d31950f137c9c357b9fa89448b176d76998180c08ceaca78bba98be" && model.length() == 584417280L }
     } catch (_: Exception) { null }
     private fun verify(expected: String): Boolean {
         val digest = MessageDigest.getInstance("SHA-256")
@@ -93,10 +97,10 @@ class CodefestAI(private val activity: MainActivity) : MethodChannel.MethodCallH
                             try { loaded.initialize(); engine = loaded } catch (e: Exception) { loaded.close(); throw e }
                         }
                         check(!cancelled.get())
-                        engine!!.createConversation().use { chat ->
+                        engine!!.createConversation(ConversationConfig(samplerConfig = SamplerConfig(topK = 40, topP = 0.9, temperature = 0.2))).use { chat ->
                             check(!cancelled.get())
                             conversation = chat
-                            val reply = chat.sendMessage(prompt, maxOutputToken = 256).toString()
+                            val reply = chat.sendMessage(prompt, repetitionPenaltyConfig = RepetitionPenaltyConfig(repetitionPenalty = 1.15f), noRepeatNgramConfig = NoRepeatNgramConfig(noRepeatNgramSize = 4), maxOutputToken = 256).toString()
                             response = if (cancelled.get()) error("cancelled") else mapOf("status" to "success", "text" to reply.take(6000))
                         }
                     } catch (_: Exception) { response = error(if (cancelled.get()) "cancelled" else "inference_failed") }

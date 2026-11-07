@@ -40,11 +40,11 @@ void main() {
   test(
     'bundled mobile entry and JS are served from loopback without development computer',
     () => HttpOverrides.runWithHttpOverrides(() async {
-      await CodefestBundleServer.start();
+      await CodefestBundleServer.start(port: 0);
       final client = HttpClient();
       try {
         final response = await (await client.getUrl(
-          Uri.parse('${CodefestBundleServer.origin}/station-map'),
+          Uri.parse('${CodefestBundleServer.listeningOrigin}/station-map'),
         )).close();
         expect(response.statusCode, 200);
         expect(
@@ -56,12 +56,14 @@ void main() {
         final script = RegExp(r'src="(/js/[^\"]+)"').firstMatch(html);
         expect(script, isNotNull);
         final asset = await (await client.getUrl(
-          Uri.parse('${CodefestBundleServer.origin}${script!.group(1)}'),
+          Uri.parse(
+            '${CodefestBundleServer.listeningOrigin}${script!.group(1)}',
+          ),
         )).close();
         expect(asset.statusCode, 200);
         await asset.drain<void>();
         final post = await (await client.postUrl(
-          Uri.parse('${CodefestBundleServer.origin}/'),
+          Uri.parse('${CodefestBundleServer.listeningOrigin}/'),
         )).close();
         expect(post.statusCode, 405);
         await post.drain<void>();

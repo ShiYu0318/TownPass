@@ -21,10 +21,12 @@ class CodefestBundleServer {
     _server = null;
   }
 
-  static Future<void> start() async {
+  static String get listeningOrigin =>
+      'http://127.0.0.1:${_server?.port ?? 8766}';
+  static Future<void> start({int port = 8766}) async {
     if (_server != null) return;
     if (_starting != null) return _starting;
-    _starting = _start();
+    _starting = _start(port);
     try {
       await _starting;
     } finally {
@@ -59,14 +61,14 @@ class CodefestBundleServer {
     return files;
   }
 
-  static Future<void> _start() async {
+  static Future<void> _start(int port) async {
     final asset = await rootBundle.load('assets/codefest_web.bundle');
     final files = decode(
       asset.buffer.asUint8List(asset.offsetInBytes, asset.lengthInBytes),
     );
     final server = await HttpServer.bind(
       InternetAddress.loopbackIPv4,
-      8766,
+      port,
       shared: false,
     );
     _server = server;
