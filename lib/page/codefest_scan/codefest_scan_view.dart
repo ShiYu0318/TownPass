@@ -140,9 +140,9 @@ class _CodefestScanViewState extends State<CodefestScanView>
                         children: [
                           FilledButton(
                             onPressed: guide['canAdvance'] == true
-                                ? () => widget.session.emit('action', {
-                                    'action': 'next',
-                                  })
+                                ? () => widget.session.requestAdvance(
+                                    guide['guidanceToken']! as String,
+                                  )
                                 : null,
                             child: Text(guide['nextLabel']! as String),
                           ),

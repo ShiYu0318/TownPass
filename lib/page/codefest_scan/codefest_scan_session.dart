@@ -17,6 +17,8 @@ class CodefestScanSession extends ValueNotifier<Map<String, Object>> {
   bool closing = false;
   String? _lastPayload;
   int _sequence = 0;
+  int _guidanceVersion = 0;
+  bool _awaitingGuidance = false;
 
   void emit(String event, [Map<String, Object?> data = const {}]) {
     onEvent({
@@ -34,6 +36,8 @@ class CodefestScanSession extends ValueNotifier<Map<String, Object>> {
         payload == _lastPayload)
       return false;
     _lastPayload = payload;
+    _awaitingGuidance = true;
+    value = {...value, 'canAdvance': false};
     emit('detected', {'payload': payload});
     return true;
   }
@@ -42,8 +46,30 @@ class CodefestScanSession extends ValueNotifier<Map<String, Object>> {
     _lastPayload = null;
   }
 
+  bool requestAdvance(String token) {
+    if (closing ||
+        _awaitingGuidance ||
+        value['canAdvance'] != true ||
+        value['guidanceToken'] != token)
+      return false;
+    _awaitingGuidance = true;
+    value = {...value, 'canAdvance': false};
+    emit('action', {'action': 'next', 'guidanceToken': token});
+    return true;
+  }
+
   void updateGuidance(Map message) {
     if (closing) return;
+    final version = message['guidanceVersion'];
+    final token = message['guidanceToken'];
+    if (version is! int ||
+        version <= _guidanceVersion ||
+        token is! String ||
+        token.isEmpty ||
+        token.length > 120)
+      return;
+    _guidanceVersion = version;
+    _awaitingGuidance = false;
     final next = Map<String, Object>.from(value);
     for (final entry in const {
       'title': 80,
@@ -55,6 +81,7 @@ class CodefestScanSession extends ValueNotifier<Map<String, Object>> {
       if (text is String)
         next[entry.key] = String.fromCharCodes(text.runes.take(entry.value));
     }
+    next['guidanceToken'] = token;
     next['canAdvance'] = message['canAdvance'] == true;
     value = next;
   }
