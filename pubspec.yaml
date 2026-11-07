@@ -28,6 +28,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  crypto: 3.0.7
+  path_provider: 2.1.6
   cached_network_image: ^4.0.4
   carousel_slider: ^5.1.2
   characters: ^1.4.1

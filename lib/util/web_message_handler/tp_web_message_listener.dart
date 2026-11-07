@@ -1,4 +1,6 @@
 import 'dart:convert';
+
+import 'package:town_pass/util/web_message_handler/codefest_ai_handler.dart';
 import 'package:town_pass/util/web_message_handler/codefest_scan_handler.dart';
 
 import 'package:town_pass/util/web_message_handler/tp_web_message_handler.dart';
@@ -8,17 +10,18 @@ abstract class TPWebMessageListener {
   // 將訊息處理器列表快取起來，避免每次訪問時都重複建立新的實例。
   // 這樣做可以提升應用程式的啟動效能，因為這些處理器通常是無狀態的。
   static final List<TPWebMessageHandler> _cachedMessageHandlers = [
-        UserinfoWebMessageHandler(),
-        LaunchMapWebMessageHandler(),
-        PhoneCallMessageHandler(),
-        Agree1999MessageHandler(),
-        LocationMessageHandler(),
-        DeviceInfoMessageHandler(),
-        OpenLinkMessageHandler(),
-        NotifyMessageHandler(),
-        QRCodeScanMessageHandler(),
-        CodefestScanMessageHandler(),
-      ];
+    UserinfoWebMessageHandler(),
+    LaunchMapWebMessageHandler(),
+    PhoneCallMessageHandler(),
+    Agree1999MessageHandler(),
+    LocationMessageHandler(),
+    DeviceInfoMessageHandler(),
+    OpenLinkMessageHandler(),
+    NotifyMessageHandler(),
+    QRCodeScanMessageHandler(),
+    CodefestScanMessageHandler(),
+    CodefestAIMessageHandler(),
+  ];
 
   static List<TPWebMessageHandler> get messageHandler => _cachedMessageHandlers;
 

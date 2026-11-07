@@ -21,5 +21,8 @@ import flutter_local_notifications
     }
 
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "CodefestAI") {
+      CodefestAI.register(with: registrar)
+    }
   }
 }

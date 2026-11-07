@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 	<dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>按下語音輸入後，在裝置上將語音轉成可編輯草稿。</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>僅使用裝置端辨識將語音轉成草稿，不使用遠端辨識。</string>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
 		<key>CFBundleDevelopmentRegion</key>
