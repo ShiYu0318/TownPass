@@ -89,3 +89,5 @@ app.*.map.json
 
 # FVM Version Cache
 .fvm/
+# Generated from CodeFest web sources by package-townpass-web.py
+/assets/codefest_web.bundle

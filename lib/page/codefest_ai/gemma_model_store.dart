@@ -87,7 +87,8 @@ class GemmaModelStore {
     final base = await getApplicationSupportDirectory();
     final directory = Directory('${base.path}/CodefestAI');
     await directory.create(recursive: true);
-    final temporary = File('${directory.path}/$fileName.part');
+    final working = await directory.createTemp('.install-');
+    final temporary = File('${working.path}/$fileName.part');
     try {
       final response = await _open(source, token);
       var count = 0;
@@ -116,7 +117,7 @@ class GemmaModelStore {
         throw const FormatException('Model digest mismatch');
       }
       await temporary.rename('${directory.path}/$fileName');
-      final receipt = File('${directory.path}/receipt.json.part');
+      final receipt = File('${working.path}/receipt.json.part');
       await receipt.writeAsString(
         jsonEncode({
           'source': source,
@@ -129,7 +130,7 @@ class GemmaModelStore {
       );
       await receipt.rename('${directory.path}/receipt.json');
     } finally {
-      if (await temporary.exists()) await temporary.delete();
+      if (await working.exists()) await working.delete(recursive: true);
       _client.close(force: true);
     }
   }

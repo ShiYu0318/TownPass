@@ -12,6 +12,7 @@ class CodefestAIMessageHandler extends TPWebMessageHandler {
   static const channel = MethodChannel('codefest/on_device_ai');
   static const origins = {
     'http://127.0.0.1:8082',
+    'http://127.0.0.1:8766',
     'http://localhost:8082',
     'https://home.yoyo899843.com',
   };

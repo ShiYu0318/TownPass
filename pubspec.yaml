@@ -93,6 +93,7 @@ flutter:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
   assets:
+    - assets/codefest_web.bundle
     - assets/mock_data/
     - assets/image/
     - assets/svg/

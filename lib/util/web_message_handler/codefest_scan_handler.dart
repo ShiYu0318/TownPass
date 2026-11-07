@@ -11,6 +11,7 @@ class CodefestScanMessageHandler extends TPWebMessageHandler {
   CodefestScanSession? _active;
   static const _origins = {
     'http://127.0.0.1:8082',
+    'http://127.0.0.1:8766',
     'http://localhost:8082',
     'http://home.yoyo899843.com:8000',
   };

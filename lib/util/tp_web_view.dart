@@ -1,4 +1,6 @@
 import 'dart:collection';
+import 'package:town_pass/util/codefest_ai_scope.dart';
+import 'package:town_pass/util/codefest_bundle_server.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -77,10 +79,13 @@ class TPWebView extends StatelessWidget {
         controller: appBarController,
       ),
       body: TPInAppWebView(
-        onWebViewCreated: (controller) {
+        onWebViewCreated: (controller) async {
           webViewController.value = controller;
           try {
-            controller.loadUrl(urlRequest: URLRequest(url: WebUri(url)));
+            if (Uri.tryParse(url)?.origin == CodefestBundleServer.origin) {
+              await CodefestBundleServer.start();
+            }
+            await controller.loadUrl(urlRequest: URLRequest(url: WebUri(url)));
           } catch (_) {
             controller.loadData(data: _failedToLoadUrlData(url: url));
           }
@@ -252,7 +257,7 @@ class TPInAppWebView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InAppWebView(
+    return CodefestAIScope(child: InAppWebView(
       onWebViewCreated: (controller) async {
         await controller.addWebMessageListener(TPWebMessageListener.webMessageListener());
         onWebViewCreated?.call(controller);
@@ -288,7 +293,10 @@ class TPInAppWebView extends StatelessWidget {
       onReceivedHttpError: onReceivedHttpError,
       onLoadResource: onLoadResource,
       onLoadResourceWithCustomScheme: onLoadResourceWithCustomScheme,
-      onLoadStart: onLoadStart,
+      onLoadStart: (controller, url) async {
+        await CodefestAIScope.stop();
+        onLoadStart?.call(controller, url);
+      },
       onLoadStop: onLoadStop,
       onLongPressHitTestResult: onLongPressHitTestResult,
       onPrintRequest: onPrintRequest,
@@ -326,7 +334,7 @@ class TPInAppWebView extends StatelessWidget {
       shouldInterceptRequest: shouldInterceptRequest,
       onCameraCaptureStateChanged: onCameraCaptureStateChanged,
       onMicrophoneCaptureStateChanged: onMicrophoneCaptureStateChanged,
-    );
+    ));
   }
 }
 

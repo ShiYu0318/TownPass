@@ -30,18 +30,27 @@ enum MyServiceItemId {
   locationSearch,
   zoo,
   codefestDiagnostics,
+  codefestLivePreview,
   ;
 }
 
 extension MyServiceIdExt on MyServiceItemId {
   MyServiceItem get item {
     return switch (this) {
-      MyServiceItemId.codefestDiagnostics => MyServiceItem(
-          title: 'CodeFest 測試環境',
-          description: '本地台北車站地圖與即時開發預覽',
+      MyServiceItemId.codefestLivePreview => MyServiceItem(
+          title: 'CodeFest 即時開發預覽',
+          description: '連接開發電腦的 Vue server，供模擬器即時更新',
           icon: Assets.svg.iconDistrictOffice.svg(),
           category: MyServiceCategory.cityLife,
           destinationUrl: 'http://127.0.0.1:8082/station-map',
+          forceWebViewTitle: 'CodeFest 即時開發預覽',
+        ),
+      MyServiceItemId.codefestDiagnostics => MyServiceItem(
+          title: 'CodeFest 測試環境',
+          description: 'App 內建地圖、掃碼導航與裝置端聊天',
+          icon: Assets.svg.iconDistrictOffice.svg(),
+          category: MyServiceCategory.cityLife,
+          destinationUrl: 'http://127.0.0.1:8766/station-map',
           forceWebViewTitle: 'CodeFest 測試環境',
         ),
       MyServiceItemId.dedicatedLine => MyServiceItem(
