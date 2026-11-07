@@ -38,10 +38,10 @@ extension MyServiceIdExt on MyServiceItemId {
     return switch (this) {
       MyServiceItemId.codefestDiagnostics => MyServiceItem(
           title: 'CodeFest 測試環境',
-          description: '本地 WebView 與原生掃碼橋接檢查',
+          description: '本地台北車站地圖與即時開發預覽',
           icon: Assets.svg.iconDistrictOffice.svg(),
           category: MyServiceCategory.cityLife,
-          destinationUrl: 'http://127.0.0.1:8765/',
+          destinationUrl: 'http://127.0.0.1:8082/station-map',
           forceWebViewTitle: 'CodeFest 測試環境',
         ),
       MyServiceItemId.dedicatedLine => MyServiceItem(
